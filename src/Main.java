@@ -1,4 +1,5 @@
 import DB.DataBase;
+import UI.BookingSystem;
 
 public class Main {
     public static void main(String[] args) {
@@ -7,6 +8,7 @@ public class Main {
                 "Antone_Project2",
                 "studentdba",
                 "K*hKSu%6yZ");
-    }
 
+        BookingSystem system = new BookingSystem(db);
+    }
 }
