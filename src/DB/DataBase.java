@@ -30,14 +30,15 @@ public class DataBase {
     }
 
     void createTables() {
-        String createTableSQL = "create table if not exists flight(\n" +
+        String createBookingTable = "";
+        String createFlightTable = "create table if not exists flight(\n" +
                 "\tid int primary key,\n" +
                 "    destination varchar(100),\n" +
                 "    departure varchar(100),\n" +
                 "    time datetime\n" +
                 ");";
         try (Statement stmt = conn.createStatement()) {
-            stmt.execute(createTableSQL);
+            stmt.execute(createFlightTable);
             System.out.println("Table created.");
         } catch (SQLException ex) {
             System.out.println("SQLException: " + ex.getMessage());
