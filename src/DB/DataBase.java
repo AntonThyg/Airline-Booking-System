@@ -1,5 +1,9 @@
 package DB;
+import com.sun.source.tree.LambdaExpressionTree;
+
+import javax.swing.*;
 import java.sql.*;
+import java.util.ArrayList;
 
 public class DataBase {
     String host, database, user, password;
@@ -28,8 +32,20 @@ public class DataBase {
         }
     }
 
-    public void insertFlight(int id, String destination, String departure, int time){
-
+    public void insertFlight(int id, String destination, String departure, String time){
+        String insertSQL = "INSERT INTO flight (id, destination, departure, time) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(insertSQL)) {
+            stmt.setInt(1, id);
+            stmt.setString(2, destination);
+            stmt.setString(3, departure);
+            stmt.setString(4, time);
+            stmt.executeUpdate();
+            System.out.println("Flight inserted.");
+        } catch (SQLException ex) {
+            System.out.println("SQLException: " + ex.getMessage());
+            System.out.println("SQLState: " + ex.getSQLState());
+            System.out.println("VendorError: " + ex.getErrorCode());
+        }
     }
 
     public void insertBooking(int id, String name, int flightId) {
@@ -47,17 +63,25 @@ public class DataBase {
         }
     }
 
-    public ResultSet viewAllBookings() {
+    public ArrayList<Booking> viewAllBookings() {
         String selectSQL = "SELECT * FROM booking";
+        ArrayList<Booking> results = new ArrayList<>();
         try {
             Statement stmt = conn.createStatement();
-            return stmt.executeQuery(selectSQL);
+            ResultSet resultSet = stmt.executeQuery(selectSQL);
+            while (resultSet.next()) {
+                results.add(new Booking(
+                        resultSet.getInt("booking_id"),
+                        resultSet.getString("name"),
+                        resultSet.getInt("flight_id")
+                ));
+            }
         } catch (SQLException ex) {
             System.out.println("SQLException: " + ex.getMessage());
             System.out.println("SQLState: " + ex.getSQLState());
             System.out.println("VendorError: " + ex.getErrorCode());
         }
-        return null;
+        return results;
     }
 
     public void deleteBooking(int id) {
@@ -71,5 +95,55 @@ public class DataBase {
             System.out.println("SQLState: " + ex.getSQLState());
             System.out.println("VendorError: " + ex.getErrorCode());
         }
+    }
+
+    public ArrayList<Object[]> searchFlightByName(String searchText){
+        String query = """
+            SELECT b.id AS booking_id, b.name, b.flight_id, f.destination, f.departure, f.time
+            FROM booking b
+            JOIN flight f ON b.flight_id = f.id
+            WHERE b.name LIKE ?;
+        """;
+        ArrayList<Object[]> results = new ArrayList<>();
+        try (var stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, "%" + searchText + "%");
+            try (ResultSet resultSet = stmt.executeQuery()) {
+                results.add(new Object[]{
+                        resultSet.getInt("booking_id"),
+                        resultSet.getString("name"),
+                        resultSet.getInt("flight_id"),
+                        resultSet.getString("destination"),
+                        resultSet.getString("departure"),
+                        resultSet.getString("time")
+                });
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return results;
+    }
+
+    public ArrayList<Object[]> getMerged(){
+        String query = """
+            SELECT b.id AS booking_id, b.name, b.flight_id, f.destination, f.departure, f.time
+            FROM booking b
+            JOIN flight f ON b.flight_id = f.id;
+        """;
+        ArrayList<Object[]> results = new ArrayList<>();
+        try (ResultSet resultSet = conn.createStatement().executeQuery(query)) {
+            while (resultSet.next()) {
+                results.add(new Object[]{
+                        resultSet.getInt("booking_id"),
+                        resultSet.getString("name"),
+                        resultSet.getInt("flight_id"),
+                        resultSet.getString("destination"),
+                        resultSet.getString("departure"),
+                        resultSet.getString("time")
+                });
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return results;
     }
 }

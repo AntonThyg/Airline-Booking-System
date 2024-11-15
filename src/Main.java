@@ -7,8 +7,10 @@ public class Main {
                 "jdbc:mysql://csci-cs418-22.dhcp.bsu.edu/",
                 "Antone_Project2",
                 "studentdba",
-                "K*hKSu%6yZ");
-
+                "K*hKSu%6yZ"
+        );
+        // uncomment if you want to add a random set of data
+        // DataParser dp = new DataParser(db);
         BookingSystem system = new BookingSystem(db);
     }
 }

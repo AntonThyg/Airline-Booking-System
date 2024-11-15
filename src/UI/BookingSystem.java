@@ -4,8 +4,6 @@ import DB.DataBase;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -14,7 +12,7 @@ public class BookingSystem {
     private JFrame frame;
     private JTable table;
     private DefaultTableModel tableModel;
-    private JTextField idField, nameField, flightIdField;
+    private JTextField idField, nameField, flightIdField, searchField;
 
     public BookingSystem(DataBase database) {
         this.database = database;
@@ -24,21 +22,22 @@ public class BookingSystem {
     private void initComponents() {
         frame = new JFrame("Booking System");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(700, 500);
+        frame.setSize(900, 600);
         frame.setLayout(new BorderLayout());
 
-        // Table for displaying bookings
-        tableModel = new DefaultTableModel(new Object[]{"ID", "Name", "Flight ID"}, 0);
+        // Table for displaying bookings with flight info
+        tableModel = new DefaultTableModel(new Object[]{"Booking ID", "Name", "Flight ID", "Destination", "Departure", "Time"}, 0);
         table = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(table);
         frame.add(scrollPane, BorderLayout.CENTER);
 
         // Panel for booking inputs and actions
-        JPanel panel = new JPanel(new GridLayout(2, 1));
+        JPanel panel = new JPanel(new GridLayout(3, 1));
         JPanel inputPanel = new JPanel(new FlowLayout());
         idField = new JTextField(5);
         nameField = new JTextField(10);
         flightIdField = new JTextField(5);
+        searchField = new JTextField(10);
 
         inputPanel.add(new JLabel("ID:"));
         inputPanel.add(idField);
@@ -49,35 +48,48 @@ public class BookingSystem {
 
         // Button for booking
         JButton bookButton = new JButton("Book");
-        bookButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                bookFlight();
-            }
-        });
+        bookButton.addActionListener(e -> bookFlight());
         inputPanel.add(bookButton);
         panel.add(inputPanel);
 
         // Panel for view and cancel buttons
         JPanel buttonPanel = new JPanel(new FlowLayout());
         JButton viewButton = new JButton("View Reservations");
-        viewButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        viewButton.addActionListener(e -> {
+            try {
                 loadBookings();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
             }
         });
         buttonPanel.add(viewButton);
 
         JButton cancelButton = new JButton("Cancel Reservation");
-        cancelButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        cancelButton.addActionListener(e -> {
+            try {
                 cancelBooking();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
             }
         });
         buttonPanel.add(cancelButton);
+
         panel.add(buttonPanel);
+
+        // Search panel
+//        JPanel searchPanel = new JPanel(new FlowLayout());
+//        searchPanel.add(new JLabel("Search by Name:"));
+//        searchPanel.add(searchField);
+//        JButton searchButton = new JButton("Search");
+//        searchButton.addActionListener(e -> {
+//            try {
+//                searchBookingsByName();
+//            } catch (SQLException ex) {
+//                throw new RuntimeException(ex);
+//            }
+//        });
+//        searchPanel.add(searchButton);
+//        panel.add(searchPanel);
 
         frame.add(panel, BorderLayout.SOUTH);
 
@@ -94,27 +106,20 @@ public class BookingSystem {
             JOptionPane.showMessageDialog(frame, "Booking added successfully.");
             clearFields();
             loadBookings();
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException | SQLException e) {
             JOptionPane.showMessageDialog(frame, "Invalid input. Please enter valid numbers for ID and Flight ID.");
         }
     }
 
-    private void loadBookings() {
+    private void loadBookings() throws SQLException {
         tableModel.setRowCount(0); // Clear existing rows
-        try {
-            ResultSet resultSet = database.viewAllBookings();
-            while (resultSet.next()) {
-                int id = resultSet.getInt("id");
-                String name = resultSet.getString("name");
-                int flightId = resultSet.getInt("flight_id");
-                tableModel.addRow(new Object[]{id, name, flightId});
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(frame, "Error loading bookings.");
+        var resultSet = database.getMerged();
+        for (Object[] o: resultSet) {
+            tableModel.addRow(o);
         }
     }
 
-    private void cancelBooking() {
+    private void cancelBooking() throws SQLException {
         int selectedRow = table.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(frame, "Please select a booking to cancel.");
@@ -126,6 +131,20 @@ public class BookingSystem {
         JOptionPane.showMessageDialog(frame, "Booking canceled successfully.");
         loadBookings();
     }
+
+    private void searchBookingsByName() throws SQLException {
+        String searchText = searchField.getText().trim();
+        if (searchText.isEmpty()) {
+            JOptionPane.showMessageDialog(frame, "Please enter a name to search.");
+            return;
+        }
+
+        tableModel.setRowCount(0); // Clear existing rows before adding search results
+
+        var resultSet = database.searchFlightByName(searchText);
+        for (Object[] o: resultSet) tableModel.addRow(o);
+    }
+
 
     private void clearFields() {
         idField.setText("");

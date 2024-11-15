@@ -1,0 +1,31 @@
+id,destination,departure,time
+101,New York,Chicago,2024-11-15 08:30:00
+102,Los Angeles,San Francisco,2024-11-15 09:00:00
+103,Miami,Dallas,2024-11-15 10:45:00
+104,Atlanta,Orlando,2024-11-15 11:15:00
+105,Denver,Houston,2024-11-15 12:30:00
+106,Seattle,Portland,2024-11-15 13:00:00
+107,Boston,Philadelphia,2024-11-15 14:15:00
+108,Las Vegas,Phoenix,2024-11-15 15:00:00
+109,San Diego,San Jose,2024-11-15 16:45:00
+110,Charlotte,Nashville,2024-11-15 17:30:00
+111,Indianapolis,Detroit,2024-11-15 18:00:00
+112,Cleveland,Pittsburgh,2024-11-15 19:30:00
+113,Austin,Memphis,2024-11-15 20:15:00
+114,Jacksonville,Tampa,2024-11-15 21:00:00
+115,Milwaukee,Minneapolis,2024-11-15 22:30:00
+116,Honolulu,Hilo,2024-11-16 08:00:00
+117,Anchorage,Juneau,2024-11-16 09:30:00
+118,St. Louis,Kansas City,2024-11-16 10:15:00
+119,Albuquerque,El Paso,2024-11-16 11:45:00
+120,Salt Lake City,Boise,2024-11-16 13:00:00
+121,Las Vegas,Denver,2024-11-16 14:15:00
+122,Chicago,Houston,2024-11-16 15:45:00
+123,Seattle,San Francisco,2024-11-16 16:30:00
+124,Dallas,Atlanta,2024-11-16 17:15:00
+125,Portland,Los Angeles,2024-11-16 18:30:00
+126,New York,Boston,2024-11-16 19:45:00
+127,Miami,Charlotte,2024-11-16 21:00:00
+128,Orlando,Tampa,2024-11-16 22:30:00
+129,San Diego,Phoenix,2024-11-17 08:00:00
+130,Washington DC,Richmond,2024-11-17 09:15:00
